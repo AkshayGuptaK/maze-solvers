@@ -55,7 +55,8 @@ def test_observer(population, num_generations, num_evaluations, args): #display 
 		print(individual.candidate.genome)
 		print(individual.fitness)
 
-def evolve_memory_solvers(nodes, paths, solvers, sel_pressure, generations):		
+def evolve_memory_solvers(nodes, paths, solvers, sel_pressure, generations, maze_function=generate_simple_maze): 
+    #performs evolutionary computuation for memory solvers		
 	rand = Random()
 	rand.seed(int(time()))
 	computation = ec.EvolutionaryComputation(rand)
@@ -66,11 +67,15 @@ def evolve_memory_solvers(nodes, paths, solvers, sel_pressure, generations):
 	computation.observer = ec.observers.stats_observer #could use test_observer
 	#migrator is default for now
 	#archiver is default for now
-	gen_maze = generate_simple_maze(rand, nodes, paths)
+	gen_maze = maze_function(rand, nodes, paths)
 
 	return computation.evolve(generate_memory_solver, evaluate_memory_solver, pop_size=solvers, maximize=False, maze=gen_maze, num_selected=sel_pressure, max_generations=generations)
 
-#result = evolve_memory_solvers(127, 150, 1000, 500, 20)
+#An example run:
+#result = evolve_memory_solvers(20, 15, 1000, 500, 20)
+#best_candidate = result[0].candidate
+#print_multi_nparray(best_candidate.genome)
+#print(result[0].fitness)
 
 #########################################################
 
@@ -102,7 +107,8 @@ def variate_smart_solver(random, candidates, args): #performs generational varia
 	mutants = ec.variators.mutator(mutate_smart_solver)(random, children, args)
 	return mutants
 
-def evolve_smart_solvers(mazes, nodes, paths, solvers, sel_pressure, generations, complexity, mutations):		
+def evolve_smart_solvers(mazes, nodes, paths, solvers, sel_pressure, generations, complexity, mutations, maze_function=generate_simple_maze):		
+    #performs evolutionary computation for smart solvers
 	rand = Random()
 	rand.seed(int(time()))
 	computation = ec.EvolutionaryComputation(rand)
@@ -113,7 +119,7 @@ def evolve_smart_solvers(mazes, nodes, paths, solvers, sel_pressure, generations
 	computation.observer = ec.observers.stats_observer #could use test_observer
 	#migrator is default for now
 	#archiver is default for now
-	maze_set = generate_mazes(rand, generate_simple_maze, mazes, nodes, paths)
+	maze_set = generate_mazes(rand, maze_function, mazes, nodes, paths)
 
 	return (computation.evolve(generate_smart_solver, evaluate_smart_solver, pop_size=solvers, maximize=False, num_selected=sel_pressure, max_generations=generations, nodes=nodes, complexity=complexity, random=rand, mazes=maze_set, mutations=mutations), maze_set)
 
@@ -133,3 +139,6 @@ def evaluate_mazes(mazes, nodes):
 #An example run:
 #result, mazes = evolve_smart_solvers(mazes=5, nodes=10, paths=10, solvers=100, sel_pressure=50, generations=5, complexity=3, mutations=20)
 #evaluate_mazes(mazes, 10)
+#best_candidate = result[0].candidate
+#print_multi_nparray(best_candidate)
+#print(result[0].fitness)
